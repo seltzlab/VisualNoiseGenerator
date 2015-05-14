@@ -1,0 +1,17 @@
+{
+  "name": "VisualNoiseGenerator",
+  "version": "0.0.1",
+  "authors": [
+    "Antonino Caccamo <antonio@seltzlab.com>"
+  ],
+  "description": "Visual noise generator I created at the Web Audio workshop with Pierre Spring at jsday 2015",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "bower_components"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "paper": "~0.9.22"
+  }
+}

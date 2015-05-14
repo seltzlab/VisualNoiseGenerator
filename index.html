@@ -1,0 +1,121 @@
+<html>
+    <head>
+        <style>
+        canvas {
+            border: 1px solid black;
+        }
+        </style>
+    </head>
+    
+    <body>
+        <h1>Visual noise generator</h1>
+    
+        <canvas id="canvas" width="500" height="500"></canvas>
+        
+        <div>
+            <button class="oscillator-type-button" data-type="sine">sine</button>
+            <button class="oscillator-type-button" data-type="square">square</button>
+            <button class="oscillator-type-button" data-type="sawtooth">sawtooth</button>
+            <button class="oscillator-type-button" data-type="triangle">triangle</button>
+        </div>
+        
+        <script src="./bower_components/paper/dist/paper-full.min.js"></script>
+        <script src="./bower_components/jquery/dist/jquery.min.js"></script>
+        <script>
+
+        var oscillatorType = "sine";
+        jQuery(".oscillator-type-button").on("click", function(e) {
+            oscillatorType = jQuery(e.target).data("type");
+        });
+        
+        var sound = function() {
+
+            var ctx = new AudioContext();
+            var out = ctx.createGain();
+            var osc = ctx.createOscillator();
+            osc.type = oscillatorType;
+            var oscGain = ctx.createGain();
+            osc.connect(oscGain);
+            
+            var lfo = ctx.createOscillator();
+            var lfoGain = ctx.createGain();
+            
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+             
+            oscGain.connect(out);
+            out.connect(ctx.destination);
+            
+            var isStarted = false;
+            
+            return {
+                "start": function() {
+                
+                    if (isStarted) {
+                        oscGain.gain.value = 1;
+                        return;
+                    }
+                    
+                    lfo.start();
+                    osc.start(ctx.currentTime);
+                    
+                    isStarted = true;
+                },
+                "stop": function() {
+                    oscGain.gain.value = 0;
+                },
+                "setOscillatorType": function(type) {
+                    osc.type = type;
+                },
+                "setOscillatorFrequency": function(value) {
+                    osc.frequency.value = value
+                },
+                "setLfoFrequency": function(value) {
+                    lfo.frequency.value = value;
+                },
+                "setLfoGain": function(value) {
+                    lfoGain.gain.value = value;
+                }
+            }
+
+        };
+        </script>
+
+        <script type="text/paperscript" canvas="canvas">
+
+        var path;
+        var audios = {};
+
+        function onMouseDown(event) {
+        
+            if (path) {
+	            path.selected = false;
+            }
+
+            path = new Path();
+            path.strokeColor = 'black';
+            path.strokeWidth = 3;
+            
+            var audio = new sound();
+            audio.start();
+            audios[path.id] = audio;
+        }
+
+        function onMouseDrag(e) {
+
+            path.add(e.point);
+
+            audios[path.id].setOscillatorFrequency(e.event.clientY / view.viewSize.height);
+            audios[path.id].setLfoFrequency(e.event.clientX / view.viewSize.width);
+            audios[path.id].setLfoGain(path.segments.length);
+        }
+
+        function onMouseUp(event) {
+
+            path.simplify();
+            path.strokeColor = 'red';
+        }
+
+        </script>
+    </body>
+</html>
