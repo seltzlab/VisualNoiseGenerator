@@ -28,9 +28,9 @@
             oscillatorType = jQuery(e.target).data("type");
         });
         
-        var sound = function() {
+        var ctx = new AudioContext();
 
-            var ctx = new AudioContext();
+        var sound = function() {
             var out = ctx.createGain();
             var osc = ctx.createOscillator();
             osc.type = oscillatorType;
